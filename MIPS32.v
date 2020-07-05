@@ -59,13 +59,13 @@ module pipeline_MIPS32(clk1, clk2);
 			ID_EXE_NPC 	<= IF_ID_NPC;
 
 			case (IF_ID_IR[31:26])	
-				ADD, SUB, AND, OR, SLT, MUL : ID_EXE_type <= RR_ALU; 
+				ADD, SUB, AND, OR, SLT, MUL 	: ID_EXE_type <= RR_ALU; 
 				ADDI, SUBI, SLTI, MULI 		: ID_EXE_type <= RM_ALU;
-				BEQZ, BNEQZ 				: ID_EXE_type <= BRANCH;
-				HLT 						: ID_EXE_type <= HALT;
-				LD 							: ID_EXE_type <= LOAD;
-				SW 							: ID_EXE_type <= STORE; 
-				default 					: ID_EXE_type <= HALT;
+				BEQZ, BNEQZ 			: ID_EXE_type <= BRANCH;
+				HLT 				: ID_EXE_type <= HALT;
+				LD				: ID_EXE_type <= LOAD;
+				SW				: ID_EXE_type <= STORE; 
+				default				: ID_EXE_type <= HALT;
 			endcase
 		end
 				
@@ -74,47 +74,47 @@ module pipeline_MIPS32(clk1, clk2);
 	always @ (posedge clk1)
 		if (HALTED == 0)
 		begin
-			EXE_MEM_IR 		<= ID_EXE_IR;
+			EXE_MEM_IR 	<= ID_EXE_IR;
 			EXE_MEM_type 	<= ID_EXE_type;
 			TAKEN_BRANCH 	<= 0; 
 
 			case (ID_EXE_type) 
 				RR_ALU	: 	begin
-								case (ID_EXE_IR[31:26])
-									ADD 	: EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_B; 
-									SUB 	: EXE_MEM_ALUOut <= ID_EXE_A - ID_EXE_B; 
-									AND 	: EXE_MEM_ALUOut <= ID_EXE_A & ID_EXE_B; 
-									OR 		: EXE_MEM_ALUOut <= ID_EXE_A | ID_EXE_B; 
-									SLT 	: EXE_MEM_ALUOut <= ID_EXE_A < ID_EXE_B; 
-									MUL 	: EXE_MEM_ALUOut <= ID_EXE_A * ID_EXE_B; 
-									default : EXE_MEM_ALUOut <= 32'hxxxxxxxx;  	
-								endcase
-							end
+							case (ID_EXE_IR[31:26])
+								ADD 	: EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_B; 
+								SUB 	: EXE_MEM_ALUOut <= ID_EXE_A - ID_EXE_B; 
+								AND 	: EXE_MEM_ALUOut <= ID_EXE_A & ID_EXE_B; 
+								OR 	: EXE_MEM_ALUOut <= ID_EXE_A | ID_EXE_B; 
+								SLT 	: EXE_MEM_ALUOut <= ID_EXE_A < ID_EXE_B; 
+								MUL 	: EXE_MEM_ALUOut <= ID_EXE_A * ID_EXE_B; 
+								default : EXE_MEM_ALUOut <= 32'hxxxxxxxx;  	
+							endcase
+						end
 
 				RM_ALU 	: 	begin 
-								case (ID_EXE_IR[31:26])
-									ADDI	: EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_Imm;
-									SUBI	: EXE_MEM_ALUOut <= ID_EXE_A - ID_EXE_Imm;
-									SLTI	: EXE_MEM_ALUOut <= ID_EXE_A < ID_EXE_Imm;
-									MULI	: EXE_MEM_ALUOut <= ID_EXE_A * ID_EXE_Imm;
-									default : EXE_MEM_ALUOut <= 32'hxxxxxxxx;
-								endcase
+							case (ID_EXE_IR[31:26])
+								ADDI	: EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_Imm;
+								SUBI	: EXE_MEM_ALUOut <= ID_EXE_A - ID_EXE_Imm;
+								SLTI	: EXE_MEM_ALUOut <= ID_EXE_A < ID_EXE_Imm;
+								MULI	: EXE_MEM_ALUOut <= ID_EXE_A * ID_EXE_Imm;
+								default : EXE_MEM_ALUOut <= 32'hxxxxxxxx;
+							endcase
 							end
 
 				BRANCH 	: 	begin
-								EXE_MEM_ALUOut 	<= ID_EXE_NPC + ID_EXE_Imm;
-								EXE_MEM_cond 	<= (ID_EXE_A == 0);
-							end
+							EXE_MEM_ALUOut 	<= ID_EXE_NPC + ID_EXE_Imm;
+							EXE_MEM_cond 	<= (ID_EXE_A == 0);
+						end
 
 				LOAD 	:	begin
-								EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_Imm;
-								EXE_MEM_B <= ID_EXE_B;
-							end
+							EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_Imm;
+							EXE_MEM_B <= ID_EXE_B;
+						end
 	 				
 	 			STORE 	:	begin
-								EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_Imm;
-								EXE_MEM_B <= ID_EXE_B;
-							end
+							EXE_MEM_ALUOut <= ID_EXE_A + ID_EXE_Imm;
+							EXE_MEM_B <= ID_EXE_B;
+						end
 			endcase
 		end
 
@@ -124,14 +124,13 @@ module pipeline_MIPS32(clk1, clk2);
 	always @ (posedge clk2)
 		if (HALTED == 0)
 		begin
-			MEM_WB_type <= EXE_MEM_type;
+			MEM_WB_type 	<= EXE_MEM_type;
 			MEM_WB_IR 	<= EXE_MEM_IR;
 
 			case (EXE_MEM_type)
 				RR_ALU, RM_ALU 	: MEM_WB_ALUOut <= EXE_MEM_ALUOut; 
-				LOAD			: MEM_WB_LMD 	<= Mem[EXE_MEM_ALUOut]; 
-				STORE			: if (TAKEN_BRANCH == 0) 	
-									Mem[EXE_MEM_ALUOut] <= EXE_MEM_B;
+				LOAD		: MEM_WB_LMD 	<= Mem[EXE_MEM_ALUOut]; 
+				STORE		: if (TAKEN_BRANCH == 0) Mem[EXE_MEM_ALUOut] <= EXE_MEM_B;
 			endcase
 		end
 
